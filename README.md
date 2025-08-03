@@ -1,12 +1,12 @@
 # Risk/Reward Calculator
 
 ## Inputs
-- **margin** (default `100`): Capital allocated to open a position.
-- **leverage** (default `1`): Multiplier applied to margin to determine overall exposure.
-- **maint_margin_pct** (default `0.5`): Maintenance margin requirement expressed as a percentage; used to calculate liquidation price.
-- **entry_price_input** (default `close`): Price at which the trade is entered. Defaults to the current closing price if left blank.
-- **take_profit_input** (default `0`): Target price for taking profit. A value of `0` disables the take‑profit line.
-- **stop_loss_input** (default `0`): Price for cutting losses. A value of `0` disables the stop‑loss line.
+- **Margin** (default `100`): Capital allocated to open a position.
+- **Leverage** (default `1`): Multiplier applied to margin to determine overall exposure.
+- **Maintenance Margin Percent** (default `0.5`): Maintenance margin requirement expressed as a percentage; used to calculate liquidation price.
+- **Entry Price** (default `close`): Price at which the trade is entered. Defaults to the current closing price if left blank.
+- **Take Profit** (default `0`): Target price for taking profit. A value of `0` disables the take‑profit line.
+- **Stop Loss** (default `0`): Price for cutting losses. A value of `0` disables the stop‑loss line.
 
 ## Table Calculations
 - **Position Size**: `margin * leverage / entry_price_input` — number of units in the position.
