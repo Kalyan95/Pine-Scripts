@@ -1,0 +1,29 @@
+//@version=5
+strategy("Direction Selection Strategy", overlay=true)
+
+// User-selected trade direction
+direction_input = input.string("Long", title="Trade Direction", options=["Long", "Short"])
+is_long = direction_input == "Long"
+
+// Take Profit and Stop Loss percentages with direction-aware defaults
+tp_percent = input.float(na, title="Take Profit (%)")
+sl_percent = input.float(na, title="Stop Loss (%)")
+
+// Apply fallbacks based on selected direction
+if na(tp_percent)
+    tp_percent := is_long ? 5.0 : -5.0
+if na(sl_percent)
+    sl_percent := is_long ? -5.0 : 5.0
+
+// Determine prices for exit
+entry_price = strategy.position_avg_price
+limit_price = entry_price * (1 + tp_percent / 100)
+stop_price  = entry_price * (1 + sl_percent / 100)
+
+// Submit entries and exits based on direction
+if is_long
+    strategy.entry("Long", strategy.long)
+    strategy.exit("Long TP/SL", from_entry="Long", limit=limit_price, stop=stop_price)
+else
+    strategy.entry("Short", strategy.short)
+    strategy.exit("Short TP/SL", from_entry="Short", limit=limit_price, stop=stop_price)
