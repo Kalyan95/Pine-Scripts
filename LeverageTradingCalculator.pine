@@ -76,11 +76,11 @@ if barstate.islast
     table.cell(t, 1, 4, "$" + str.tostring(take_profit, format.mintick), text_color=color.green, text_halign=text.align_left)
 
     // SL row highlighted when unsafe
-    table.cell(t, 0, 5, "SL", text_color=color.white, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 0) : color.new(color.black, 0))
+    table.cell(t, 0, 5, "SL", text_color=color.yellow, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 0) : color.new(color.black, 0))
     table.cell(t, 1, 5, (sl_unsafe ? "⚠️ " : "") + "$" + str.tostring(stop_loss, format.mintick), text_color=sl_unsafe ? color.white : color.yellow, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 0) : color.new(color.black, 0))
 
     // Liq row also highlighted when unsafe
-    table.cell(t, 0, 6, "Liq", text_color=color.white, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 15) : color.new(color.black, 0))
+    table.cell(t, 0, 6, "Liq", text_color=color.red, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 15) : color.new(color.black, 0))
     table.cell(t, 1, 6, "$" + str.tostring(liq_price, format.mintick), text_color=sl_unsafe ? color.white : color.red, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 15) : color.new(color.black, 0))
 
     table.cell(t, 0, 7, "Profit", text_color=color.green, text_halign=text.align_left)
