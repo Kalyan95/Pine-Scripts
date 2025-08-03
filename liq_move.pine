@@ -1,0 +1,15 @@
+//@version=5
+indicator("Liquidation Move", overlay=false)
+
+leverage = input.float(10.0, "Leverage")
+maint_margin_pct = input.float(0.005, "Maintenance Margin (%)")
+entry_price = input.float(100.0, "Entry Price")
+
+margin_ratio = 1 / leverage - maint_margin_pct
+margin_ratio := math.max(margin_ratio, 0)
+
+if margin_ratio == 0
+    alert("Maintenance margin is too high for the selected leverage", alert.freq_once_per_bar)
+
+liq_move = entry_price * margin_ratio
+plot(liq_move, title="Liq Move")
