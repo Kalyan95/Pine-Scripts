@@ -1,22 +1,23 @@
 # Risk/Reward Calculator
 
 ## Inputs
-- **Margin** (default `100`): Capital allocated to open a position.
-- **Leverage** (default `1`): Multiplier applied to margin to determine overall exposure.
-- **Maintenance Margin Percent** (default `0.5`): Maintenance margin requirement expressed as a percentage; used to calculate liquidation price.
-- **Entry Price** (default `close`): Price at which the trade is entered. Defaults to the current closing price if left blank.
-- **Take Profit** (default `0`): Target price for taking profit. A value of `0` disables the take‑profit line.
-- **Stop Loss** (default `0`): Price for cutting losses. A value of `0` disables the stop‑loss line.
+- **Margin**                     `default 100`: Capital allocated to open a position.
+- **Leverage**                   `default 1`: Multiplier applied to margin to determine overall exposure.
+- **Maintenance Margin Percent** `default 0.5`: Maintenance margin requirement expressed as a percentage; used to calculate liquidation price.
+- **Entry Price**                `default close`: Price at which the trade is entered. Defaults to the current closing price if left blank.
+- **Take Profit**                `default 0`: Target price for taking profit. A value of `0` disables the take‑profit line.
+- **Stop Loss**                  `default 0`: Price for cutting losses. A value of `0` disables the stop‑loss line.
 
 ## Table Calculations
-- **Position Size**: `margin * leverage / entry_price_input` — number of units in the position.
-- **Risk**: `(entry_price_input - stop_loss_input) * position_size` — potential loss if stop loss is reached.
-- **Reward**: `(take_profit_input - entry_price_input) * position_size` — potential gain if take profit is reached.
-- **R/R Ratio**: `reward / risk` (absolute values) — ratio of potential reward to potential risk.
+- **Position Size**:     `margin * leverage / entry_price_input` — number of units in the position.
+- **Risk**:              `(entry_price_input - stop_loss_input) * position_size` — potential loss if stop loss is reached.
+- **Reward**:            `(take_profit_input - entry_price_input) * position_size` — potential gain if take profit is reached.
+- **R/R Ratio**:         `reward / risk` (absolute values) — ratio of potential reward to potential risk.
 - **Liquidation Price**: `entry_price_input * (1 - (1 / leverage - maint_margin_pct))` — approximate price at which the position would be liquidated.
-- **Margin Used**: equals the `margin` input.
-- **Potential PnL**: displays risk and reward in account currency.
-- **Risk % of Margin**: `risk / margin * 100`.
+- **Margin Used**:       `margin` input.
+- **Risk % of Margin**:  `risk / margin * 100`.
+- **Potential PnL**:      Displays risk and reward in account currency.
+
 
 ## Features and Description
 - Customizable risk and reward lines with editable take‑profit and stop‑loss levels.
