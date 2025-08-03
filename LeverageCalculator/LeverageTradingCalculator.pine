@@ -1,0 +1,98 @@
+//@version=6
+indicator("Leverage Trading Calculator [Compact Bottom Right]", overlay=true, max_labels_count=10)
+
+// ─── User Inputs ───
+margin   = input.float(100, "Margin ($)", step=1)
+leverage = input.int(2, "Leverage", minval=1)
+maint_margin_pct = input.float(0.5, "Maintenance Margin (%)", step=0.1) / 100
+
+entry_price_input = input.float(0.0, "Entry Price (0 = use current)", step=0.1)
+take_profit_input = input.float(0.0, "Take Profit (0 = auto +5%)", step=0.1)
+stop_loss_input   = input.float(0.0, "Stop Loss (0 = auto -5%)", step=0.1)
+
+// ─── Fallback logic ───
+entry_price = entry_price_input == 0.0 ? close : entry_price_input
+take_profit = take_profit_input == 0.0 ? close * 1.05 : take_profit_input
+stop_loss   = stop_loss_input == 0.0 ? close * 0.95 : stop_loss_input
+
+// ─── Position Size ───
+position_size = margin * leverage
+
+// ─── Detect Long or Short ───
+is_long = take_profit > entry_price
+
+// ─── Risk & Reward ───
+risk_per_unit   = is_long ? entry_price - stop_loss : stop_loss - entry_price
+reward_per_unit = is_long ? take_profit - entry_price : entry_price - take_profit
+
+risk   = position_size * math.abs(risk_per_unit / entry_price)
+reward = position_size * math.abs(reward_per_unit / entry_price)
+rr_ratio = reward / risk
+
+// ─── Liquidation Price (Isolated Margin) ───
+liq_move  = (margin / position_size - maint_margin_pct) * entry_price
+liq_price = is_long ? entry_price - liq_move : entry_price + liq_move
+
+// ─── Condition: Stop Loss unsafe ───
+sl_unsafe = (is_long and stop_loss <= liq_price) or (not is_long and stop_loss >= liq_price)
+
+// ─── Create persistent lines once ───
+var line entryLine = line.new(bar_index, entry_price, bar_index+1, entry_price, color=color.blue, extend=extend.right, style=line.style_solid, width=2)
+var line tpLine    = line.new(bar_index, take_profit, bar_index+1, take_profit, color=color.green, extend=extend.right, style=line.style_solid, width=2)
+var line slLine    = line.new(bar_index, stop_loss, bar_index+1, stop_loss, color=color.yellow, extend=extend.right, style=line.style_solid, width=2)
+var line liqLine   = line.new(bar_index, liq_price, bar_index+1, liq_price, color=color.red, extend=extend.right, style=line.style_solid, width=2)
+
+// ─── Update their position each bar ───
+if barstate.islast
+    line.set_xy1(entryLine, bar_index, entry_price)
+    line.set_xy2(entryLine, bar_index+1, entry_price)
+
+    line.set_xy1(tpLine, bar_index, take_profit)
+    line.set_xy2(tpLine, bar_index+1, take_profit)
+
+    line.set_xy1(slLine, bar_index, stop_loss)
+    line.set_xy2(slLine, bar_index+1, stop_loss)
+
+    line.set_xy1(liqLine, bar_index, liq_price)
+    line.set_xy2(liqLine, bar_index+1, liq_price)
+
+// ─── Compact Table in Bottom Right ───
+var table t = table.new(position=position.bottom_right, columns=2, rows=10, border_width=0, frame_color=color.black, bgcolor=color.new(color.black, 80))
+
+if barstate.islast
+    table.cell(t, 0, 0, "Trade", text_color=color.white, text_halign=text.align_left)
+    table.cell(t, 1, 0, is_long ? "LONG" : "SHORT", text_color=color.white, text_halign=text.align_left)
+
+    table.cell(t, 0, 1, "Margin", text_color=color.white, text_halign=text.align_left)
+    table.cell(t, 1, 1, "$" + str.tostring(margin, format.mintick), text_color=color.white, text_halign=text.align_left)
+
+    table.cell(t, 0, 2, "Lev", text_color=color.white, text_halign=text.align_left)
+    table.cell(t, 1, 2, str.tostring(leverage), text_color=color.white, text_halign=text.align_left)
+
+    table.cell(t, 0, 3, "Entry", text_color=color.blue, text_halign=text.align_left)
+    table.cell(t, 1, 3, "$" + str.tostring(entry_price, format.mintick), text_color=color.blue, text_halign=text.align_left)
+
+    table.cell(t, 0, 4, "TP", text_color=color.green, text_halign=text.align_left)
+    table.cell(t, 1, 4, "$" + str.tostring(take_profit, format.mintick), text_color=color.green, text_halign=text.align_left)
+
+    // SL row highlighted when unsafe
+    table.cell(t, 0, 5, "SL", text_color=color.yellow, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 0) : color.new(color.black, 0))
+    table.cell(t, 1, 5, (sl_unsafe ? "⚠️ " : "") + "$" + str.tostring(stop_loss, format.mintick), text_color=sl_unsafe ? color.white : color.yellow, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 0) : color.new(color.black, 0))
+
+    // Liq row also highlighted when unsafe
+    table.cell(t, 0, 6, "Liq", text_color=color.red, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 15) : color.new(color.black, 0))
+    table.cell(t, 1, 6, "$" + str.tostring(liq_price, format.mintick), text_color=sl_unsafe ? color.white : color.red, text_halign=text.align_left, bgcolor=sl_unsafe ? color.new(color.red, 15) : color.new(color.black, 0))
+
+    table.cell(t, 0, 7, "Profit", text_color=color.green, text_halign=text.align_left)
+    table.cell(t, 1, 7, "$" + str.tostring(reward, format.mintick), text_color=color.green, text_halign=text.align_left)
+
+    table.cell(t, 0, 8, "Loss", text_color=color.red, text_halign=text.align_left)
+    table.cell(t, 1, 8, "$" + str.tostring(risk, format.mintick), text_color=color.red, text_halign=text.align_left)
+
+    table.cell(t, 0, 9, "R/R", text_color=color.white, text_halign=text.align_left)
+    table.cell(t, 1, 9, str.tostring(rr_ratio, format.mintick), text_color=color.white, text_halign=text.align_left)
+
+// ─── Alerts ───
+alertcondition(sl_unsafe, 
+   title="Stop Loss Unsafe", 
+   message="⚠️ Stop Loss is unsafe: below liquidation (LONG) or above liquidation (SHORT)!")
