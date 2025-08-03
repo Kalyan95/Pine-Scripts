@@ -1,0 +1,15 @@
+//@version=5
+indicator("Risk/Reward Demo", overlay=true)
+
+stop = close - 100
+profit = close + 200
+
+risk = close - stop
+reward = profit - close
+rr_ratio = risk != 0 ? reward / risk : na
+
+var table stats = table.new(position.top_right, 2, 1, border_width=1)
+if barstate.islast
+    table.cell(stats, 0, 0, "R/R", text_color=color.white, bgcolor=color.blue)
+    rr_text = na(rr_ratio) ? "—" : str.tostring(rr_ratio, format.mintick)
+    table.cell(stats, 1, 0, rr_text, text_color=color.white, bgcolor=color.blue)
