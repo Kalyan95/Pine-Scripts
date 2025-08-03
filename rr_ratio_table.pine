@@ -1,0 +1,14 @@
+//@version=5
+indicator("RR Ratio Table", overlay=true)
+
+// Example risk/reward ratio
+float rr_ratio = 1.2345
+
+// Create a table
+var table rr_table = table.new(position.top_right, 1, 1, frame_color=color.new(color.black, 0), frame_width=1)
+
+// Convert ratio to text using fixed-format string to ensure consistent decimal places
+string rr_text = str.tostring(rr_ratio, format="#.##")
+
+if barstate.islast
+    table.cell(rr_table, 0, 0, rr_text)
