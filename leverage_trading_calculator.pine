@@ -1,0 +1,39 @@
+//@version=5
+indicator("Leverage Trading Calculator", overlay=true, precision=2)
+
+// User inputs
+margin    = input.float(100,  "Margin",    minval=0)
+leverage  = input.float(10,   "Leverage",  minval=1)
+entry     = input.float(100,  "Entry Price", minval=0)
+stop      = input.float(95,   "Stop Loss",  minval=0)
+target    = input.float(110,  "Take Profit", minval=0)
+
+// Calculations
+position_size = margin * leverage
+is_long       = stop < entry
+risk_value    = (is_long ? entry - stop : stop - entry) * position_size / entry
+reward_value  = (is_long ? target - entry : entry - target) * position_size / entry
+rr_ratio      = reward_value / risk_value
+liq_price     = entry * (is_long ? 1 - 1 / leverage : 1 + 1 / leverage)
+unsafe_stop   = (is_long and stop <= liq_price) or (not is_long and stop >= liq_price)
+
+// Display table
+var tbl = table.new(position.top_right, 2, 6, border_width=1)
+if barstate.islast
+    table.cell(tbl, 0, 0, "Position Size")
+    table.cell(tbl, 1, 0, str.tostring(position_size))
+    table.cell(tbl, 0, 1, "Risk")
+    table.cell(tbl, 1, 1, str.tostring(risk_value))
+    table.cell(tbl, 0, 2, "Reward")
+    table.cell(tbl, 1, 2, str.tostring(reward_value))
+    table.cell(tbl, 0, 3, "R:R")
+    table.cell(tbl, 1, 3, str.tostring(rr_ratio))
+    table.cell(tbl, 0, 4, "Liquidation")
+    table.cell(tbl, 1, 4, str.tostring(liq_price))
+    table.cell(tbl, 0, 5, "Direction")
+    table.cell(tbl, 1, 5, is_long ? "Long" : "Short")
+
+// Alerts
+alertcondition(unsafe_stop, title="Unsafe stop", message="Stop loss is beyond liquidation price")
+alertcondition(is_long,  title="Long position",  message="Setup is long")
+alertcondition(not is_long, title="Short position", message="Setup is short")
